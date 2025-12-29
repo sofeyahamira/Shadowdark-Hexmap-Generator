@@ -1,7 +1,5 @@
-// --- DATA TABLES ---
-
 const TERRAINS = [
-    { name: "Desert/Arctic", colorClass: "t-desert-arctic", icon: "❄️/☀️" },
+    { name: "Desert/Arctic", colorClass: "t-desert-arctic", icon: "☀️" },
     { name: "Swamp", colorClass: "t-swamp", icon: "🐊" },
     { name: "Grassland", colorClass: "t-grassland", icon: "🌾" },
     { name: "Forest/Jungle", colorClass: "t-forest-jungle", icon: "🌲" },
@@ -11,15 +9,13 @@ const TERRAINS = [
 ];
 
 const DANGER_LEVELS = [
-    { roll: 1, label: "Safe", class: "danger-safe" },
-    { roll: 3, label: "Unsafe", class: "danger-unsafe" },
-    { roll: 5, label: "Risky", class: "danger-risky" },
-    { roll: 6, label: "Deadly", class: "danger-deadly" }
+    { label: "Safe", class: "danger-safe" },
+    { label: "Unsafe", class: "danger-unsafe" },
+    { label: "Risky", class: "danger-risky" },
+    { label: "Deadly", class: "danger-deadly" }
 ];
 
-const CATACLYSMS = [
-    "Volcano", "Fire", "Earthquake", "Storm", "Flood", "War", "Pestilence", "Magical disaster"
-];
+const CATACLYSMS = ["Volcano", "Fire", "Earthquake", "Storm", "Flood", "War", "Pestilence", "Magical disaster"];
 
 const SETTLEMENT_NAMES = [
     { village: "Bruga's Hold", town: "Fairhollow", city: "Doraine" },
@@ -53,76 +49,36 @@ const POI_DEVELOPMENTS = [
     "Hiding a great treasure", "With a door to another plane"
 ];
 
-// --- HELPER FUNCTIONS ---
+function roll(s) { return Math.floor(Math.random() * s) + 1; }
 
-function rollDie(sides) {
-    return Math.floor(Math.random() * sides) + 1;
-}
-
-function roll2d6() {
-    return rollDie(6) + rollDie(6);
-}
-
-function getTerrainFromRoll(roll) {
-    if (roll === 2) return 0;
-    if (roll === 3) return 1;
-    if (roll >= 4 && roll <= 6) return 2;
-    if (roll >= 7 && roll <= 8) return 3;
-    if (roll >= 9 && roll <= 10) return 4;
-    if (roll === 11) return 5;
-    if (roll === 12) return 6;
-    return 2;
-}
-
-function getDangerLevel() {
-    let r = rollDie(6);
-    if (r === 1) return DANGER_LEVELS[0];
-    if (r <= 3) return DANGER_LEVELS[1];
-    if (r <= 5) return DANGER_LEVELS[2];
-    return DANGER_LEVELS[3];
+function getTerrainIndex(r) {
+    if (r === 2) return 0;
+    if (r === 3) return 1;
+    if (r <= 6) return 2;
+    if (r <= 8) return 3;
+    if (r <= 10) return 4;
+    if (r === 11) return 5;
+    return 6;
 }
 
 function generatePOI() {
-    if (rollDie(6) > 3) return null;
+    if (roll(6) !== 1) return null;
+    const locR = roll(20);
+    const devR = roll(20);
 
-    const locRoll = rollDie(20);
-    const devRoll = rollDie(20);
+    let locName = POI_LOCATIONS[locR - 1];
+    let devText = POI_DEVELOPMENTS[devR - 1];
 
-    let locationName = POI_LOCATIONS[locRoll - 1];
-    let developmentText = POI_DEVELOPMENTS[devRoll - 1];
-
-    // Handle Settlement Names based on Location roll
-    if (locRoll >= 7 && locRoll <= 11) {
-        const nameRoll = rollDie(8);
-        let name = "";
-        let type = "";
-        
-        if (locRoll <= 8) {
-            name = SETTLEMENT_NAMES[nameRoll-1].village;
-            type = "Village";
-        } else if (locRoll <= 10) {
-            name = SETTLEMENT_NAMES[nameRoll-1].town;
-            type = "Town";
-        } else {
-            name = SETTLEMENT_NAMES[nameRoll-1].city;
-            type = "City/Metropolis";
-        }
-        locationName = `${type}: ${name}`;
+    if (locR >= 7 && locR <= 11) {
+        const nR = roll(8);
+        if (locR <= 8) locName = `Village: ${SETTLEMENT_NAMES[nR-1].village}`;
+        else if (locR <= 10) locName = `Town: ${SETTLEMENT_NAMES[nR-1].town}`;
+        else locName = `City: ${SETTLEMENT_NAMES[nR-1].city}`;
     }
 
-    // Handle Cataclysm based on Development roll
-    if (devRoll === 1) {
-        const catRoll = rollDie(8);
-        developmentText = `Disaster! (${CATACLYSMS[catRoll - 1]})`;
-    }
-
-    return {
-        name: locationName,
-        details: developmentText
-    };
+    if (devR === 1) devText = `Disaster! (${CATACLYSMS[roll(8) - 1]})`;
+    return { name: locName, details: devText };
 }
-
-// --- MAIN GENERATION LOGIC ---
 
 function generateMap() {
     const count = document.getElementById('hexCount').value;
@@ -130,51 +86,40 @@ function generateMap() {
     const log = document.getElementById('textLog');
     
     grid.innerHTML = "";
-    log.innerHTML = "<h3>Generated Path</h3>";
+    log.innerHTML = "";
 
-    let currentTerrainIndex = getTerrainFromRoll(roll2d6());
+    let currentT = getTerrainIndex(roll(6) + roll(6));
 
     for (let i = 1; i <= count; i++) {
         if (i > 1) {
-            let newHexRoll = roll2d6();
-            if (newHexRoll >= 2 && newHexRoll <= 3) {
-                currentTerrainIndex = (currentTerrainIndex + 1) % 7;
-            } else if (newHexRoll >= 9 && newHexRoll <= 11) {
-                currentTerrainIndex = (currentTerrainIndex + 2) % 7;
-            } else if (newHexRoll === 12) {
-                currentTerrainIndex = getTerrainFromRoll(roll2d6());
-            } 
+            const nextR = roll(6) + roll(6);
+            if (nextR <= 3) currentT = (currentT + 1) % 7;
+            else if (nextR >= 9 && nextR <= 11) currentT = (currentT + 2) % 7;
+            else if (nextR === 12) currentT = getTerrainIndex(roll(6) + roll(6));
         }
 
-        const terrainObj = TERRAINS[currentTerrainIndex];
-        const danger = getDangerLevel();
+        const terrain = TERRAINS[currentT];
+        const dangerRoll = roll(6);
+        const danger = dangerRoll === 1 ? DANGER_LEVELS[0] : (dangerRoll <= 3 ? DANGER_LEVELS[1] : (dangerRoll <= 5 ? DANGER_LEVELS[2] : DANGER_LEVELS[3]));
         const poi = generatePOI();
 
-        // Render Hex Element
-        const hexDiv = document.createElement('div');
-        hexDiv.className = `hex ${terrainObj.colorClass}`;
-        if (poi) hexDiv.classList.add('has-poi');
-        hexDiv.innerHTML = `<span class="hex-id">#${i}</span><span class="hex-icon">${terrainObj.icon}</span>`;
-        
-        hexDiv.onclick = () => {
-            alert(`Hex #${i}\nTerrain: ${terrainObj.name}\nDanger: ${danger.label}\nPOI: ${poi ? poi.name + ' - ' + poi.details : 'None'}`);
-        };
+        // UI Hex
+        const hex = document.createElement('div');
+        hex.className = `hex ${terrain.colorClass} ${poi ? 'has-poi' : ''}`;
+        hex.innerHTML = `<span class="hex-id">#${i}</span><span class="hex-icon">${terrain.icon}</span>`;
+        hex.onclick = () => alert(`Hex ${i}: ${terrain.name}\nDanger: ${danger.label}\nPOI: ${poi ? poi.name : 'None'}`);
+        grid.appendChild(hex);
 
-        grid.appendChild(hexDiv);
-
-        // Render Log Entry
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        let poiString = poi ? `<span class="poi-text">${poi.name}</span> <br> &nbsp;&nbsp; -> ${poi.details}` : "None";
-
-        entry.innerHTML = `
-            <strong>Hex:</strong> ${i} <br>
-            <strong>Terrain:</strong> ${terrainObj.name} <br>
-            <strong>Danger Level:</strong> <span class="${danger.class}">${danger.label}</span> <br>
-            <strong>POI:</strong> ${poiString}
-        `;
-        log.appendChild(entry);
+        // UI Log
+        log.innerHTML += `
+            <div class="log-entry">
+                <strong>Hex:</strong> ${i}<br>
+                <strong>Terrain:</strong> ${terrain.name}<br>
+                <strong>Danger level:</strong> <span class="${danger.class}">${danger.label}</span><br>
+                <strong>POI:</strong> ${poi ? `<span class="poi-text">${poi.name}</span> (${poi.details})` : 'None'}
+            </div>`;
     }
 }
 
+// Initial load
 window.onload = generateMap;
