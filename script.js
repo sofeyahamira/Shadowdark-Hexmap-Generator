@@ -32,28 +32,53 @@
         { village: "Nighthaven", town: "Toresk", city: "Rahgbat" }
     ];
 
-    const POI_TABLE = [
-        { label: "Small tower", dev: "Disaster! Roll on Cataclysm table" }, // 1
-        { label: "Fortified keep", dev: "Over/connected to a large tomb" }, // 2
-        { label: "Natural landmark", dev: "Being attacked by an invader" }, // 3-4
-        { label: "Natural landmark", dev: "Being attacked by an invader" },
-        { label: "Temple", dev: "Home to an oracle" }, // 5
-        { label: "Barrow mounds", dev: "Around/over a sleeping dragon" }, // 6
-        { label: "Village", dev: "Abandoned and in ruins" }, // 7-8
-        { label: "Village", dev: "Abandoned and in ruins" },
-        { label: "Town", dev: "Guarded by its current residents" }, // 9-10
-        { label: "Town", dev: "Guarded by its current residents" },
-        { label: "City/metropolis", dev: "Under siege by a warband" }, // 11
-        { label: "Ravine", dev: "Home to a religious cult" }, // 12
-        { label: "Monster nest", dev: "Where a secret circle of wizards meets" }, // 13-14
-        { label: "Monster nest", dev: "Where a secret circle of wizards meets" },
-        { label: "Hermit's abode", dev: "Occupied by a self-titled king/queen" }, // 15
-        { label: "Cave formation", dev: "Controlled by a malevolent sorcerer" }, // 16-17
-        { label: "Cave formation", dev: "Controlled by a malevolent sorcerer" },
-        { label: "Ancient dolmens", dev: "Protected by an age-old guardian" }, // 18
-        { label: "Barbarian camp", dev: "Hiding a great treasure" }, // 19
-        { label: "Holy shrine", dev: "With a door to another plane" } // 20
+// Ranges (like 3-4) are handled by repeating the entry in the array indices
+    const POI_LOCATIONS = [
+        "Small tower",      // 1
+        "Fortified keep",   // 2
+        "Natural landmark", // 3
+        "Natural landmark", // 4
+        "Temple",           // 5
+        "Barrow mounds",    // 6
+        "Village",          // 7
+        "Village",          // 8
+        "Town",             // 9
+        "Town",             // 10
+        "City/metropolis",  // 11
+        "Ravine",           // 12
+        "Monster nest",     // 13
+        "Monster nest",     // 14
+        "Hermit's abode",   // 15
+        "Cave formation",   // 16
+        "Cave formation",   // 17
+        "Ancient dolmens",  // 18
+        "Barbarian camp",   // 19
+        "Holy shrine"       // 20
     ];
+
+    const POI_DEVELOPMENTS = [
+        "Disaster! Roll on Cataclysm table",      // 1
+        "Over/connected to a large tomb",         // 2
+        "Being attacked by an invader",           // 3
+        "Being attacked by an invader",           // 4
+        "Home to an oracle",                      // 5
+        "Around/over a sleeping dragon",          // 6
+        "Abandoned and in ruins",                 // 7
+        "Abandoned and in ruins",                 // 8
+        "Guarded by its current residents",       // 9
+        "Guarded by its current residents",       // 10
+        "Under siege by a warband",               // 11
+        "Home to a religious cult",               // 12
+        "Where a secret circle of wizards meets", // 13
+        "Where a secret circle of wizards meets", // 14
+        "Occupied by a self-titled king/queen",   // 15
+        "Controlled by a malevolent sorcerer",    // 16
+        "Controlled by a malevolent sorcerer",    // 17
+        "Protected by an age-old guardian",       // 18
+        "Hiding a great treasure",                // 19
+        "With a door to another plane"            // 20
+    ];
+
 
     // --- HELPER FUNCTIONS ---
 
@@ -85,25 +110,51 @@
         return DANGER_LEVELS[3];
     }
 
-    function generatePOI() {
+        function generatePOI() {
         // Roll d6, on a 1 there is a POI
         if (rollDie(6) !== 1) return null;
 
-        const roll = rollDie(20);
-        // Array is 0-indexed, so we use roll-1
-        let poiBase = POI_TABLE[roll - 1];
-        let result = {
-            name: poiBase.label,
-            details: poiBase.dev,
-            roll: roll
-        };
+        // Roll TWO separate d20s
+        const locRoll = rollDie(20);
+        const devRoll = rollDie(20);
 
-        // Handle Special Cases
-        // 1. Cataclysm (Roll 1)
-        if (roll === 1) {
-            const catRoll = rollDie(8);
-            result.details = `Disaster! (${CATACLYSMS[catRoll - 1]})`;
+        let locationName = POI_LOCATIONS[locRoll - 1];
+        let developmentText = POI_DEVELOPMENTS[devRoll - 1];
+
+        // --- Handle Special Case: Settlement Names (Dependent on Location Roll) ---
+        // Village (7-8), Town (9-10), City (11)
+        if (locRoll >= 7 && locRoll <= 11) {
+            const nameRoll = rollDie(8);
+            let specificName = "";
+            let type = "";
+            
+            if (locRoll <= 8) { // Village
+                specificName = SETTLEMENT_NAMES[nameRoll-1].village;
+                type = "Village";
+            } else if (locRoll <= 10) { // Town
+                specificName = SETTLEMENT_NAMES[nameRoll-1].town;
+                type = "Town";
+            } else { // City
+                specificName = SETTLEMENT_NAMES[nameRoll-1].city;
+                type = "City/Metropolis";
+            }
+            // Combine Type + Name
+            locationName = `${type}: ${specificName}`;
         }
+
+        // --- Handle Special Case: Cataclysm (Dependent on Development Roll) ---
+        // If Development Roll is 1 ("Disaster!"), trigger Cataclysm table
+        if (devRoll === 1) {
+            const catRoll = rollDie(8);
+            developmentText = `Disaster! (${CATACLYSMS[catRoll - 1]})`;
+        }
+
+        return {
+            name: locationName,
+            details: developmentText
+        };
+    }
+
         
         // 2. Settlement Names (Village 7-8, Town 9-10, City 11)
         if (roll >= 7 && roll <= 11) {
