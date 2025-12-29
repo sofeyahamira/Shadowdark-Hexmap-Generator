@@ -1,0 +1,144 @@
+:root {
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --accent-color: #d4af37; /* Gold-ish */
+  --panel-bg: #2b2b2b;
+  --hex-size: 100px;
+}
+
+body {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  color: var(--accent-color);
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--accent-color);
+  padding-bottom: 10px;
+}
+
+.controls {
+  margin-bottom: 20px;
+  background: var(--panel-bg);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #444;
+}
+
+button {
+  background-color: var(--accent-color);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+input {
+  padding: 10px;
+  background: #000;
+  border: 1px solid #555;
+  color: #fff;
+  width: 60px;
+  font-family: inherit;
+}
+
+/* HEX GRID STYLES */
+.hex-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
+  justify-content: center;
+  margin-bottom: 40px;
+  gap: 10px; /* Gap between hex items strictly for flex flow */
+}
+
+.hex {
+  width: var(--hex-size);
+  height: calc(var(--hex-size) * 0.866); /* Hex height ratio */
+  background-color: #555;
+  position: relative;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  text-align: center;
+  color: #000;
+  font-weight: bold;
+  transition: transform 0.2s;
+  margin-right: -15px; /* Overlap for honeycomb look */
+  margin-bottom: -10px;
+}
+
+.hex:hover {
+  transform: scale(1.1);
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.hex-id {
+  font-size: 1.2em;
+  margin-bottom: 2px;
+}
+
+.hex-icon {
+  font-size: 1.5em;
+}
+
+.has-poi::after {
+  content: "!";
+  position: absolute;
+  top: 5px;
+  right: 25px;
+  color: red;
+  font-weight: 900;
+  font-size: 1.2em;
+}
+
+/* TERRAIN COLORS */
+.t-desert-arctic { background-color: #d8d8d8; }
+.t-swamp { background-color: #4a5d23; color: #fff; }
+.t-grassland { background-color: #7cfc00; }
+.t-forest-jungle { background-color: #006400; color: #fff;}
+.t-river-coast { background-color: #4682b4; color: #fff;}
+.t-ocean { background-color: #000080; color: #fff;}
+.t-mountain { background-color: #696969; color: #fff; }
+
+/* OUTPUT LOG */
+.output-log {
+  width: 80%;
+  background: var(--panel-bg);
+  padding: 20px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  border: 1px solid #444;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  border-bottom: 1px dashed #555;
+  padding: 10px 0;
+}
+.log-entry:last-child { border-bottom: none; }
+
+.poi-text { color: #ff6b6b; font-weight: bold; }
+.danger-safe { color: #55efc4; }
+.danger-unsafe { color: #ffeaa7; }
+.danger-risky { color: #ff7675; }
+.danger-deadly { color: #d63031; font-weight: bold;}
