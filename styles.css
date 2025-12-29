@@ -7,7 +7,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
