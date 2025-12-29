@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadowdark Hex Map Generator</title>
+</head>
+<body>
+    <h1>Shadowmap</h1>
+    
+    <div class="controls">
+        <label>Number of Hexes: <input type="number" id="hexCount" value="10" min="1" max="100"></label>
+        <button onclick="generateMap()">Generate Map</button>
+    </div>
+
+    <div class="hex-container" id="hexGrid">
+        </div>
+
+    <div class="output-log" id="textLog">
+        </div>
+</body>
+</html>
