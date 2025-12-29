@@ -62,7 +62,7 @@ function getTerrainIndex(r) {
 }
 
 function generatePOI() {
-    if (roll(6) !== 1) return null;
+    if (roll(6) > 3) return null;
     const locR = roll(20);
     const devR = roll(20);
 
